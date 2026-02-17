@@ -1,3 +1,4 @@
+
 import {
   Container,
   Typography,
@@ -15,20 +16,19 @@ import {
   DialogActions,
 } from "@mui/material";
 import { useMemo, useState } from "react";
-import { initialPortfolio } from "../data/mockPortfolioData";
 import StockFormModal from "../components/StockFormModal";
-// import { useMemo, useState, useEffect } from "react";
+import { usePortfolioStore } from "../store/portfolioStore";
 
 export default function Portfolio() {
-  const [rows, setRows] = useState(initialPortfolio);
-//     const [rows, setRows] = useState(() => {
-//   const saved = localStorage.getItem("portfolio");
-//   return saved ? JSON.parse(saved) : initialPortfolio;
-// });
+  // ✅ Zustand state + actions
+  const rows = usePortfolioStore((s) => s.rows);
+  const addStock = usePortfolioStore((s) => s.addStock);
+  const editStock = usePortfolioStore((s) => s.editStock);
+  const deleteStock = usePortfolioStore((s) => s.deleteStock);
 
+  // ✅ UI state (local to this page)
   const [openForm, setOpenForm] = useState(false);
   const [editingRow, setEditingRow] = useState(null);
-
   const [deleteTarget, setDeleteTarget] = useState(null);
 
   const handleAddClick = () => {
@@ -43,27 +43,11 @@ export default function Portfolio() {
 
   const handleSave = (data) => {
     if (editingRow) {
-      // Edit existing
-      setRows((prev) =>
-        prev.map((r) =>
-          r.id === editingRow.id
-            ? {
-                ...r,
-                ...data,
-                // keep currentPrice unchanged (could be updated later)
-                currentPrice: r.currentPrice,
-              }
-            : r
-        )
-      );
+      // ✅ Edit existing in Zustand store
+      editStock(editingRow.id, data);
     } else {
-      // Add new
-      const newRow = {
-        id: String(Date.now()),
-        ...data,
-        currentPrice: data.purchasePrice, // simple default
-      };
-      setRows((prev) => [newRow, ...prev]);
+      // ✅ Add new in Zustand store
+      addStock(data);
     }
 
     setOpenForm(false);
@@ -71,18 +55,23 @@ export default function Portfolio() {
   };
 
   const handleDeleteConfirm = () => {
-    setRows((prev) => prev.filter((r) => r.id !== deleteTarget.id));
+    // ✅ Delete from Zustand store
+    deleteStock(deleteTarget.id);
     setDeleteTarget(null);
   };
 
   const totalValue = useMemo(() => {
     return rows.reduce((sum, r) => sum + r.currentPrice * r.quantity, 0);
   }, [rows]);
-  
 
   return (
     <Container sx={{ mt: 3 }}>
-      <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 2 }}>
+      <Stack
+        direction="row"
+        justifyContent="space-between"
+        alignItems="center"
+        sx={{ mb: 2 }}
+      >
         <Typography variant="h4">Portfolio</Typography>
         <Button variant="contained" onClick={handleAddClick}>
           Add Stock
@@ -97,13 +86,27 @@ export default function Portfolio() {
         <Table>
           <TableHead>
             <TableRow>
-              <TableCell><b>Ticker</b></TableCell>
-              <TableCell><b>Company</b></TableCell>
-              <TableCell><b>Quantity</b></TableCell>
-              <TableCell><b>Purchase Price</b></TableCell>
-              <TableCell><b>Current Price</b></TableCell>
-              <TableCell><b>Purchase Date</b></TableCell>
-              <TableCell align="right"><b>Actions</b></TableCell>
+              <TableCell>
+                <b>Ticker</b>
+              </TableCell>
+              <TableCell>
+                <b>Company</b>
+              </TableCell>
+              <TableCell>
+                <b>Quantity</b>
+              </TableCell>
+              <TableCell>
+                <b>Purchase Price</b>
+              </TableCell>
+              <TableCell>
+                <b>Current Price</b>
+              </TableCell>
+              <TableCell>
+                <b>Purchase Date</b>
+              </TableCell>
+              <TableCell align="right">
+                <b>Actions</b>
+              </TableCell>
             </TableRow>
           </TableHead>
 
@@ -118,7 +121,11 @@ export default function Portfolio() {
                 <TableCell>{row.purchaseDate}</TableCell>
                 <TableCell align="right">
                   <Stack direction="row" spacing={1} justifyContent="flex-end">
-                    <Button size="small" variant="outlined" onClick={() => handleEditClick(row)}>
+                    <Button
+                      size="small"
+                      variant="outlined"
+                      onClick={() => handleEditClick(row)}
+                    >
                       Edit
                     </Button>
                     <Button
@@ -145,7 +152,7 @@ export default function Portfolio() {
         </Table>
       </Paper>
 
-      {/* Add/Edit Modal */}
+      {/* ✅ Add/Edit Modal */}
       <StockFormModal
         open={openForm}
         onClose={() => {
@@ -156,16 +163,19 @@ export default function Portfolio() {
         initialData={editingRow}
       />
 
-      {/* Delete Confirm Dialog */}
+      {/* ✅ Delete Confirm Dialog */}
       <Dialog open={!!deleteTarget} onClose={() => setDeleteTarget(null)}>
         <DialogTitle>Delete Stock</DialogTitle>
         <DialogContent>
-          Are you sure you want to delete{" "}
-          <b>{deleteTarget?.ticker}</b>?
+          Are you sure you want to delete <b>{deleteTarget?.ticker}</b>?
         </DialogContent>
         <DialogActions>
           <Button onClick={() => setDeleteTarget(null)}>Cancel</Button>
-          <Button color="error" variant="contained" onClick={handleDeleteConfirm}>
+          <Button
+            color="error"
+            variant="contained"
+            onClick={handleDeleteConfirm}
+          >
             Delete
           </Button>
         </DialogActions>
