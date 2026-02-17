@@ -17,9 +17,14 @@ import {
 import { useMemo, useState } from "react";
 import { initialPortfolio } from "../data/mockPortfolioData";
 import StockFormModal from "../components/StockFormModal";
+// import { useMemo, useState, useEffect } from "react";
 
 export default function Portfolio() {
   const [rows, setRows] = useState(initialPortfolio);
+//     const [rows, setRows] = useState(() => {
+//   const saved = localStorage.getItem("portfolio");
+//   return saved ? JSON.parse(saved) : initialPortfolio;
+// });
 
   const [openForm, setOpenForm] = useState(false);
   const [editingRow, setEditingRow] = useState(null);
@@ -73,6 +78,7 @@ export default function Portfolio() {
   const totalValue = useMemo(() => {
     return rows.reduce((sum, r) => sum + r.currentPrice * r.quantity, 0);
   }, [rows]);
+  
 
   return (
     <Container sx={{ mt: 3 }}>
