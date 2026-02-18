@@ -20,13 +20,13 @@ import StockFormModal from "../components/StockFormModal";
 import { usePortfolioStore } from "../store/portfolioStore";
 
 export default function Portfolio() {
-  // ✅ Zustand state + actions
+  // These are zustand states 
   const rows = usePortfolioStore((s) => s.rows);
   const addStock = usePortfolioStore((s) => s.addStock);
   const editStock = usePortfolioStore((s) => s.editStock);
   const deleteStock = usePortfolioStore((s) => s.deleteStock);
 
-  // ✅ UI state (local to this page)
+  // This is UI state which is local on this page
   const [openForm, setOpenForm] = useState(false);
   const [editingRow, setEditingRow] = useState(null);
   const [deleteTarget, setDeleteTarget] = useState(null);
@@ -43,10 +43,10 @@ export default function Portfolio() {
 
   const handleSave = (data) => {
     if (editingRow) {
-      // ✅ Edit existing in Zustand store
+      // edit 
       editStock(editingRow.id, data);
     } else {
-      // ✅ Add new in Zustand store
+      // add new
       addStock(data);
     }
 
@@ -55,7 +55,7 @@ export default function Portfolio() {
   };
 
   const handleDeleteConfirm = () => {
-    // ✅ Delete from Zustand store
+    // delete 
     deleteStock(deleteTarget.id);
     setDeleteTarget(null);
   };
@@ -152,7 +152,7 @@ export default function Portfolio() {
         </Table>
       </Paper>
 
-      {/* ✅ Add/Edit Modal */}
+      {/* Add/Edit Modal */}
       <StockFormModal
         open={openForm}
         onClose={() => {
@@ -163,7 +163,7 @@ export default function Portfolio() {
         initialData={editingRow}
       />
 
-      {/* ✅ Delete Confirm Dialog */}
+      {/* Delete Confirm Dialog */}
       <Dialog open={!!deleteTarget} onClose={() => setDeleteTarget(null)}>
         <DialogTitle>Delete Stock</DialogTitle>
         <DialogContent>
